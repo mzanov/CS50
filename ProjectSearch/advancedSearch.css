@@ -1,0 +1,47 @@
+.logo > img {
+  position: fixed;
+  top: 22px;
+  left: 20px;
+  width: 75px;
+}
+
+h3 {
+  font-family: sans-serif;
+  margin-top: 100px;
+  margin-left: 50px;
+  color: red;
+}
+
+.advanced-search-form div {
+  margin-bottom: 15px;
+}
+
+.advanced-search-form label {
+  display: inline-block;
+  width: 200px;
+  margin-right: 10px;
+}
+
+.advanced-search-form input[type="text"] {
+  display: inline-block;
+  width: 400px;
+  padding: 7px;
+  border: 1px solid #ccc;
+}
+
+.button-container {
+  text-align: center;
+}
+
+.advanced-search-button {
+  padding: 10px 20px;
+  border-radius: 5px;
+  background-color: #4285f4;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.advanced-search-button:hover {
+  background-color: #357ae8;
+}
