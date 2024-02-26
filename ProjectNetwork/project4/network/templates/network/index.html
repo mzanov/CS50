@@ -1,0 +1,84 @@
+{% extends "network/layout.html" %}
+
+{% block body %}
+<div class="container">
+    <h1>All Posts</h1>
+
+    {% if user.is_authenticated %}
+    <div class="mb-3">
+        <label for="post" class="form-label">New Post</label>
+        <form action="{% url 'new_post' %}" method="post">
+            {% csrf_token %}
+            <textarea name="content" class="form-control" id="post" rows="3"></textarea>
+            <div class="mt-2 d-flex justify-content-end">
+                <button type="submit" class="btn btn-primary">Post</button>
+            </div>
+        </form>
+    </div>
+
+    <hr>
+
+    <div>
+    {% for post in posts %}
+    <div class="card mb-3" style="max-width: 540px;">
+        <div class="row g-0">
+            <!-- Picture -->
+            <div class="col-md-12 mb-2">
+                <img src="{{ post.image }}" class="img-fluid rounded-start">
+            </div>
+            <!-- User Information and Content -->
+            <div class="col-md-12">
+                <div class="card-body">
+                    <!-- User Name with Link to Profile -->
+                    <h5 class="card-text">
+                        <a href="{% url 'profile' user_id=post.user.id %}" class="text-dark text-decoration-none">
+                            @{{ post.user }}
+                        </a>
+                    </h5>
+                    <!-- Content -->
+                    <h5 class="card-text">{{ post.content }}</h5>
+                    <!-- Location -->
+                    <h6 class="card-subtitle mb-2 text-body-secondary">${{ post.location }}</h6>
+                    <!-- Description -->
+                    <p class="card-text">{{ listing.description }}</p>
+                </div>
+            </div>
+        </div>
+        <!-- Like Button, Comment Button, and Count -->
+        <div class="d-flex justify-content-end align-items-center">
+            <h6 id="like_count" data-post="{{ post.id }}" class="m-0 me-2">0</h6>
+            <!-- Like Button -->
+            {% if post.id in liked_posts %}
+            <button id="like_button" data-post="{{ post.id }}" data-user="{{ user.id }}" type="button"
+                class="btn btn-link">❤️</button>
+            {% else %}
+            <button id="like_button" data-post="{{ post.id }}" data-user="{{ user.id }}" type="button"
+                class="btn btn-link">🤍</button>
+            {% endif %}
+            <!-- Comment Button -->
+            <button id="comment_button" data-post="{{ post.id }}" type="button" class="btn btn-link">💬</button>
+        </div>
+        <!-- Edit Button -->
+        {% if user == post.user %}
+        <button id="edit" data-post="{{ post.id }}" type="button" class="button btn-link bg-transparent border-0">Edit</button>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+
+    <nav class="d-flex justify-content-end mt-2">
+        <ul class="pagination">
+            {% if posts.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page={{ posts.previous_page_number }}">Previous</a></li>
+            {% endif %}
+
+            {% if posts.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ posts.next_page_number }}">Next</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
+
+{% endif %}
+
+{% endblock %}

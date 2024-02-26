@@ -1,0 +1,27 @@
+{% extends "blog/layout.html" %}
+
+{% block body %}
+<div class="container-form">
+<h2>Edit Post</h2>
+<form action="{% url 'edit_post' post.id %}" method="post">
+    {% csrf_token %}
+    <div class="mb-3">
+        <label for="content" class="form-label">Content:</label>
+        <textarea class="form-control" name="content" rows="3">{{ post.content }}</textarea>
+    </div>
+
+    <div class="mb-3">
+        <label for="image" class="form-label">Image URL:</label>
+        <input type="url" name="image" class="form-control" id="image" placeholder="URL Address" value="{{ post.image }}">
+    </div>
+
+    <div class="mb-3">
+        <label for="category" class="form-label">Location:</label>
+        <input type="text" name="location" class="form-control" id="location" placeholder="Location" value="{{ post.location }}">
+    </div>
+    
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a href="{% url 'profile' user_id=request.user.id %}" class="btn btn-secondary">Cancel</a>
+</form>
+</div>
+{% endblock %}

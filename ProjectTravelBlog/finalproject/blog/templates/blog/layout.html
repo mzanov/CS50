@@ -1,0 +1,55 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>{% block title %}Blog{% endblock %}</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+        <link href="{% static 'blog/style.css' %}" rel="stylesheet">
+        
+    </head>
+    <body>
+
+        <nav class="navbar">
+            <h1><img style="max-width: 270px; max-height: 100px; left: -42px;top: 15px; position: relative;" src="{% static 'blog\logo1.png' %}" /></h1>
+            <ul class="nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'explore' %}">Explore</a>
+                </li>
+
+                {% if user.is_authenticated %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'following' %}">Following</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'profile' user_id=user.id %}">My Blog</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
+                </li>
+                {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'login' %}">Log In</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'register' %}">Register</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        <div id="user-logged-in">
+            {% if user.is_authenticated %}
+                Signed in as <strong>{{ user.username }}</strong>.
+            {% else %}
+                Not signed in.
+            {% endif %}
+        </div>
+        <hr>
+        <div class="body">
+            {% block body %}
+            {% endblock %}
+        </div>
+        <script src="{% static 'blog/main.js' %}"></script>
+    </body>
+</html>

@@ -217,3 +217,4 @@ def add_comment(request, listing_id):
     new_comment.save()
 
     return HttpResponseRedirect(reverse("listing_details", args=(listing_id,)))
+

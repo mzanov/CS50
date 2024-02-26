@@ -1,0 +1,100 @@
+{% extends "blog/layout.html" %}
+
+{% block body %}
+<div class="container">
+    <h1>{{ user_profile }}</h1>
+    
+    <div class="row px-3">
+        <div class="col-8 d-flex">
+            <p>
+                <h6><strong>{{ following }}</strong></h6>
+                &nbsp;
+                <h6 class="text-muted">Following</h6>
+            </p>
+
+            <p class="mx-3">
+                <h6><strong>{{ followers }}</strong></h6>
+                &nbsp;
+                <h6 class="text-muted">Followers</h6>
+            </p>
+        </div>
+
+        {% if user_profile == request.user %}
+        <div class="col-4 d-flex justify-content-end">
+  
+            <h6><strong><a class="nav-link" href="{% url 'edit_account' %}">Edit Account</a></strong></h6>
+        </div>
+        {% endif %}
+        <div class="col-4 d-flex justify-content-end">
+            {% if user.is_authenticated %}
+            {% if user != user_profile %}
+            {% if is_following %}
+            <form action="{% url 'unfollow' %}" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="user_unfollow" value="{{ username }}">
+                <button type="submit" class="btn btn-primary">Unfollow</button>
+            </form>
+            {% else %}
+            <form action="{% url 'follow' %}" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="user_follow" value="{{ username }}">
+                <button type="submit" class="btn btn-primary">Follow</button>
+            </form>
+            {% endif %}
+            {% endif %}
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Display User's Bio -->
+    <div class="row px-3 mt-3">
+        <div class="col-12">
+            {% if user_profile.bio %}
+                <p>{{ user_profile.bio }}</p>
+            {% else %}
+                <p>No bio available.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <hr>
+
+    <h2 class="text-center mb-4">My Blog</h3>
+
+    <div class="container">
+        <div class="row row-cols-1 row-cols-md-3">
+            {% for post in posts %}
+            <div class="col mb-4">
+                <div class="card h-100">
+                    {% if user == post.user %}
+                    <a href="{% url 'edit_post' post_id=post.id %}" id="edit_button" class="edit_button btn btn-link" data-post="{{ post.id }}">Edit</a>
+                    {% endif %}
+                    <img src="{{ post.image }}" class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            @{{ post.user }}
+                        </h5>
+                        <p class="card-text"><a href="{% url 'post' post_id=post.id %}"  class="text-dark text-decoration-none"> {{post.content }}</a></p>
+                        <p class="card-text"><i class="bi bi-geo"></i><small class="text-muted">{{ post.location }}</small></p>
+                    </div>
+                    <div class="card-footer d-flex justify-content-end align-items-center">
+                        <h6 id="like_count" style="position: relative; left: 130;" data-post="{{ post.id }}" class="m-0 me-2">0</h6>
+                        <!-- Like Button -->
+                        {% if post.id in liked_posts %}
+                        <button id="like_button" data-post="{{ post.id }}" data-user="{{ user.id }}" type="button"
+                            class="btn btn-link">❤️</button>
+                        {% else %}
+                        <button id="like_button" data-post="{{ post.id }}" data-user="{{ user.id }}" type="button"
+                            class="btn btn-link">🤍</button>
+                        {% endif %}
+                        <!-- Comment Button -->
+                        <button id="comment_button" data-post="{{ post.id }}" type="button"
+                            class="btn btn-link">💬</button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>    
+</div>
+{% endblock %}

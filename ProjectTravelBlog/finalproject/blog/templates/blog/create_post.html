@@ -1,0 +1,26 @@
+{% extends "blog/layout.html" %}
+
+{% block body %}
+<div class="container-form" >
+<h2>Create New Post</h2>
+<form action="{% url 'create_post' %}" method="post">
+    {% csrf_token %}
+    <div class="mb-3">
+        <label for="description" class="form-label">Content:</label>
+        <textarea class="form-control" name="content" id="content" rows="3"></textarea>
+    </div>
+
+    <div class="mb-3">
+        <label for="image" class="form-label">Image URL:</label>
+        <input type="url" name="image" class="form-control" id="image" placeholder="URL Address">
+    </div>
+
+    <div class="mb-3">
+        <label for="category" class="form-label">Location:</label>
+        <input type="text" name="location" class="form-control" id="location" placeholder="Location">
+    </div>
+    
+    <button type="submit" class="btn btn-primary">Create</button>
+</form>
+</div>
+{% endblock %}
