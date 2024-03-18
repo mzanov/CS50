@@ -1,0 +1,5 @@
+.profile-picture {
+    width: 200px; /* Adjust the size as needed */
+    border-radius: 50%; /* Make the picture round */
+    margin-bottom: 20px; /* Add some space below the picture */
+}

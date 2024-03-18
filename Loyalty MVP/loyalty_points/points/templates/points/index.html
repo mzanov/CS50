@@ -1,0 +1,43 @@
+{% extends "points/layout.html" %}
+
+{% block body %}
+<div class="container">
+    <h1>User Information</h1>
+    <img class="profile-picture" src="{{ user.picture }}" alt="Profile Picture">
+    <ul>
+        <li>Username: {{ user.username }}</li>
+        <li>Email: {{ user.email }}</li>
+        <li>First Name: {{ user.first_name }}</li>
+        <li>Last Name: {{ user.last_name }}</li>
+        <li>Birthday: {{ user.birthday }}</li>
+        <li>Phone: {{ user.phone }}</li>
+        <li>Active Points: {{ user.active_points }}</li>
+        <!-- Add more user information fields as needed -->
+    </ul>
+    <p><a href="{% url 'add_store' %}">Add store</a></p>
+    <p><a href="{% url 'scan_receipts' %}">Scan receipts</a></p>
+
+    <h2>Stores</h2>
+    <ul>
+        {% for store in stores %}
+            <li>{{ store.name }}, {{store.address}}</li>
+            <!-- Add more information about the store as needed -->
+        {% endfor %}
+    </ul>
+
+    <h2>Receipts</h2>
+    {% for receipt in receipts %}
+    <li>
+        <img src="{{ receipt.raw_image }}" alt="Receipt Image" width="100">
+        <ul>
+            <li>Amount: {{ receipt.amount }}</li>
+            <li>Date: {{ receipt.date }}</li>
+            <li>Store: {{ receipt.store.name }}</li>
+            <li>Address: {{ receipt.address }}</li>
+            <!-- Add more information about the receipt as needed -->
+        </ul>
+    </li>
+{% endfor %}
+</ul>
+</div>
+{% endblock %}

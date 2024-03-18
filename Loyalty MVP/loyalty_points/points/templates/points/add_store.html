@@ -1,0 +1,21 @@
+{% extends "points/layout.html" %}
+
+{% block body %}
+<div class="container-form" >
+<h2>Add New Store</h2>
+<form action="{% url 'add_store' %}" method="post">
+    {% csrf_token %}
+    <div class="mb-3">
+        <label for="description" class="form-label">Name:</label>
+        <textarea class="form-control" name="name" id="name" rows="3"></textarea>
+    </div>
+
+    <div class="mb-3">
+        <label for="address" class="form-label">Address:</label>
+        <textarea class="form-control" name="address" id="address" rows="3"></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Add</button>
+</form>
+</div>
+{% endblock %}
