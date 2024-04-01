@@ -1,0 +1,48 @@
+{% extends "points/layout.html" %}
+
+{% block body %}
+<div class="container">
+    <h1>User Information</h1>
+    <img class="profile-picture" src="{{ user.picture }}" alt="Profile Picture">
+    <ul>
+        <li>Username: {{ user.username }}</li>
+        <li>Email: {{ user.email }}</li>
+        <li>First Name: {{ user.first_name }}</li>
+        <li>Last Name: {{ user.last_name }}</li>
+        <li>Birthday: {{ user.birthday }}</li>
+        <li>Phone: {{ user.phone }}</li>
+        <li>Active Points: {{ user.active_points }}</li>
+        <li>Claimed Rewards:
+            <ul>
+                {% for reward in user.rewards.all %}
+                    <li>{{ reward.reward_name }} - {{ reward.points_requirement }} Points</li>
+                {% endfor %}
+            </ul>
+        </li>
+        <!-- Add more user information fields as needed -->
+    </ul>
+    <p><a href="{% url 'create_reward' %}">Create reward</a></p>
+
+    <h2>Rewards</h2>
+        {% if messages %}
+            {% for message in messages %}
+                <li style="color: red;">{{ message }}</li>
+            {% endfor %}
+    {% endif %}
+    <ul>
+        {% for reward in rewards %}
+            <li>
+                {{ reward.reward_name }} - {{ reward.points_requirement }} Points
+                {% if reward in user.rewards.all %}
+                <span class="claimed">Claimed</span>
+                {% else %}
+                <form action="{% url 'redeem_reward' reward.id %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary">Redeem</button>
+                </form>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

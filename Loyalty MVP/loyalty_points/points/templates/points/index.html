@@ -11,6 +11,7 @@
         <li>Last Name: {{ user.last_name }}</li>
         <li>Birthday: {{ user.birthday }}</li>
         <li>Phone: {{ user.phone }}</li>
+        <li>Points History: {{ user.points_history }}</li>
         <li>Active Points: {{ user.active_points }}</li>
         <!-- Add more user information fields as needed -->
     </ul>
@@ -28,12 +29,11 @@
     <h2>Receipts</h2>
     {% for receipt in receipts %}
     <li>
-        <img src="{{ receipt.raw_image }}" alt="Receipt Image" width="100">
+        <img src="{{ receipt.raw_image.url }}" alt="Receipt Image" width="100">
         <ul>
             <li>Amount: {{ receipt.amount }}</li>
             <li>Date: {{ receipt.date }}</li>
             <li>Store: {{ receipt.store.name }}</li>
-            <li>Address: {{ receipt.address }}</li>
             <!-- Add more information about the receipt as needed -->
         </ul>
     </li>

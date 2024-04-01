@@ -1,16 +1,22 @@
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
+from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.urls import reverse
-
-from .models import *
+import tempfile
+import pytesseract
+import re
+import hashlib
+import os
+from datetime import datetime
+from .models import CustomUser, Receipt, Store, Reward
 # Create your views here.
 
 def index(request):
     customer = request.user
     stores = Store.objects.all()
-    receipts = Receipts.objects.filter(customer=request.user)
+    receipts = Receipt.objects.filter(customer=request.user)
 
     return render(request, "points/index.html", {
         "user" : customer,
@@ -98,29 +104,139 @@ def add_store(request):
     else:
         return render(request, "points/add_store.html")
     
+def extract_info(image_path):
+    pytesseract.pytesseract.tesseract_cmd = 'C:/Program Files/Tesseract-OCR/tesseract.exe'
+    text = pytesseract.image_to_string(image_path)
+
+    stores = ["ZARA", "Nike", "Walmart"]
+    price_patterns = [
+        r'\s+TOTAL\s+(\d+\.\d+)',
+        r'TOTAL\s+\d+\s+(\d+\.\d+)',
+        r'TOTAL\s+(\d+\.\d+)'
+    ]
+    date_patterns = [
+        r'(\d{2}/\d{2}/\d{2})',
+        r'(\d{2}/\d{2}/\d{4})'
+    ]
+
+    total_price = "Unknown"
+    extracted_date = "Unknown"
+    store_name = "Unknown"
+
+    # Extract the price
+    for pattern in price_patterns:
+        match = re.search(pattern, text)
+        if match:
+            total_price = match.group(1)
+            break
+
+    # Extract the store name
+    for store in stores:
+        pattern = re.compile(r'\b{}\b'.format(re.escape(store)), re.IGNORECASE)
+        if re.search(pattern, text):
+            store_name = store
+            break
+
+    for date in date_patterns:
+        match = re.search(date, text)
+        if match:
+            extracted_date = match.group(1)
+
+    return store_name, extracted_date, total_price
+
+def generate_image_identifier(image_content):
+    image_hash = hashlib.sha256(image_content).hexdigest()
+    return image_hash
+
 def scan_receipts(request):
     if request.method == 'POST':
-        user = request.user
-        raw_image = request.POST['raw_image']
-        amount = request.POST['amount']
-        date = request.POST['date'] 
-        store_name = request.POST['store']
-        address = request.POST['address']
+        image_file = request.FILES.get('receipt_image')
+        if image_file:
+            image_content = image_file.read()
+            image_identifier = generate_image_identifier(image_content)
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') as temp_image:
+                temp_image.write(image_content)
+                temp_image_path = temp_image.name
+            store_name, date, total_price = extract_info(temp_image_path)
+
+            try_formats = ['%d/%m/%Y', '%m/%d/%Y', '%m/%d/%y', '%d/%m/%y']
+            parsed_date = None
+            for format in try_formats:
+                try:
+                    parsed_date = datetime.strptime(date, format)
+                    break
+                except ValueError:
+                    continue
+            
+            if parsed_date:
+                date = parsed_date.strftime('%Y-%m-%d')
+            else:
+                date = None
+            
+            if Receipt.objects.filter(image_identifier=image_identifier).exists():
+                print(image_identifier)
+                return render(request, "points/scan_receipts.html", {
+                    "message": "This receipt has already been scanned."
+                })
+            
+            
+            try:
+                store_instance = Store.objects.get(name=store_name)
+            except Store.DoesNotExist:
+                return render(request, "points/scan_receipts.html", {
+                "message": "Receipt could not be scanned."
+            })
+
+            current_user = request.user
+
+            receipt = Receipt(raw_image=image_file, store=store_instance, date=date, amount=total_price, customer=current_user, image_identifier=image_identifier)
+            receipt.save()
+
+            total_price_int = int(float(total_price))
+            current_user.active_points += total_price_int
+            current_user.points_history += total_price_int
+            current_user.save()
+                
+            return redirect('index')
+            
+    
+    return render(request, "points/scan_receipts.html")
+
+def reward_list(request):
+    customer = request.user
+    rewards = Reward.objects.all()
+    return render(request, "points/reward_list.html", {
+        "user" : customer,
+        "rewards": rewards
+    })
+
+def create_reward(request):
+    if request.method == "POST":
+
+        name = request.POST["reward_name"]
+        points = request.POST["points_requirement"]
 
 
-        store = Store.objects.filter(name=store_name).first()
 
-        # Create a new Receipt object with the received data
-        receipt = Receipts.objects.create(
-            raw_image=raw_image,
-            amount=amount,
-            date=date,
-            store=store,
-            address=address,
-            customer=user  # Assuming you have a logged-in user associated with the receipt
-        )
+        new_reward = Reward(
+            reward_name= name,
+            points_requirement= points,
+            )
+        new_reward.save()
 
-        
-        return redirect('index')  # Replace 'success_page' with the name of your success page URL pattern
+        return HttpResponseRedirect(reverse("reward_list"))
+    else:
+        return render(request, "points/create_reward.html")
+    
+def redeem_reward(request, reward_id):
+    user = request.user
+    reward = Reward.objects.get(pk=reward_id)
 
-    return render(request, 'points/scan_receipts.html')
+    if reward.points_requirement <= user.active_points and reward not in user.rewards.all():
+        user.active_points -= reward.points_requirement
+        user.rewards.add(reward)
+        user.save()  
+    else:
+        messages.error(request, "You don't have enough points to redeem this reward.")
+    
+    return HttpResponseRedirect(reverse("reward_list"))
