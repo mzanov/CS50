@@ -4,9 +4,9 @@ import hashlib
 from .models import Store
 
 def extract_info(image_path):
-    pytesseract.pytesseract.tesseract_cmd = 'C:/Program Files/Tesseract-OCR/tesseract.exe'
+    pytesseract.pytesseract.tesseract_cmd = 'tesseract'
     text = pytesseract.image_to_string(image_path)
-
+    
     stores = Store.objects.values_list('name', flat=True)
     price_patterns = [
         r'\s+TOTAL\s+(\d+\.\d+)',
