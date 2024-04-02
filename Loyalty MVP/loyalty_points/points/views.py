@@ -11,6 +11,9 @@ from .utils import extract_info, generate_image_identifier
 # Create your views here.
 
 def index(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+   
     customer = request.user
     stores = Store.objects.all()
     receipts = Receipt.objects.filter(customer=request.user)
